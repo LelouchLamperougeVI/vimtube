@@ -1,6 +1,6 @@
 import curses
 from curses import wrapper
-import player
+from . import player
 
 greeting_msg = 'Welcome to VimTube! To begin, type :help'
 
@@ -10,13 +10,13 @@ class TUI:
         self.selection = 0
         self.player = player.player()
         self.start_ui()
-        
+
     def start_ui(self):
         self.rx, self.ry = self.stdscr.getmaxyx()
         self.stdscr.clear()
-        self.stdscr.addstr(0, int(self.ry/2 - len(greeting_msg)/2), greeting_msg, curses.A_STANDOUT)
+        self.stdscr.addstr(0, int(self.ry/2 - len(greeting_msg)/2), greeting_msg, curses.A_BOLD)
         self.stdscr.move(self.rx-1,0)
-        
+
     def update_selection(self, pos=0):
         self.selection = pos
         self.stdscr.clear()
@@ -28,7 +28,7 @@ class TUI:
                 self.stdscr.addstr(pos, 5, item.title, curses.A_STANDOUT)
             pos += 1
         self.stdscr.addstr(self.rx-1,0, 'selection: ' + str(self.selection))
-        
+
     def interpret(self, key):
         if key == ord('/'):
             token = self.sentence(key)
@@ -43,15 +43,20 @@ class TUI:
         elif key == ord('k'):
             if self.selection > 0:
                 self.update_selection(self.selection-1)
-    
+        elif key in [curses.KEY_ENTER, ord('\n')]:
+            self.player.load(self.selection)
+            self.player.play()
+            while key != ord('q'):
+                key = self.stdscr.getch()
+            self.player.player.stop
+
     def sentence(self,key=0):
         token = ''
         pos = 0
         while key not in [curses.KEY_ENTER, ord('\n')]:
             if key == curses.KEY_BACKSPACE:
                 pos = pos - 1
-                self.stdscr.addstr(self.rx-1,pos, ' ')
-                self.stdscr.move(self.rx-1,pos)
+                self.cl(pos)
                 token = token[:-1]
                 key = self.stdscr.getch()
                 continue
@@ -59,7 +64,14 @@ class TUI:
             key = self.stdscr.getch()
             token += chr(key)
             pos += 1
+        self.cl()
         return token[:-1]
+
+    def cl(self, pos=0, line=None): # clear a line; if line==None clear current line
+        if line is None:
+            line, _ = self.stdscr.getyx()
+        self.stdscr.move(line, pos)
+        self.stdscr.clrtoeol()
 
 def main(stdscr):
     ui = TUI(stdscr)
@@ -70,4 +82,5 @@ def main(stdscr):
         stdscr.move(ui.rx-1,0)
         key = stdscr.getch()
 
-wrapper(main)
+if __name__ == "__main__":
+    wrapper(main)

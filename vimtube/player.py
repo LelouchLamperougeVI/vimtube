@@ -4,6 +4,7 @@ import re
 from html.parser import HTMLParser
 from collections import namedtuple
 import pafy
+import vlc
 
 Results_template = namedtuple('entry', 'title url')
 yt_url = 'https://www.youtube.com'
@@ -35,14 +36,14 @@ class player:
         self.video = video
         self.status = 'stopped'
         self.catalogue = list()
-        
+
     def load(self, selection=0):
         self.video = pafy.new(yt_url + self.catalogue[selection].url)
-        
-    def list(self):
-        for item in self.catalogue:
-            print(item)
-    
+
+    def play(self):
+        self.player = vlc.MediaPlayer(self.video.getbest().url)
+        self.player.play()
+
     def search(self, query):
         enc_query = urllib.parse.urlencode({'search_query': query})
         html = urllib.request.urlopen(yt_url + '/results?' + enc_query)
