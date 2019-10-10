@@ -34,15 +34,37 @@ class parse(HTMLParser):
 class player:
     def __init__(self, video=None):
         self.video = video
-        self.status = 'stopped'
+        self.status = None
         self.catalogue = list()
 
     def load(self, selection=0):
-        self.video = pafy.new(yt_url + self.catalogue[selection].url)
+        if len(self.catalogue) > 0:
+            self.video = pafy.new(yt_url + self.catalogue[selection].url)
 
     def play(self):
+        if self.status is not None:
+            self.player.set_mrl(self.video.getbest().url)
+            self.stop()
         self.player = vlc.MediaPlayer(self.video.getbest().url)
         self.player.play()
+        self.status = 1
+
+    def pause(self):
+        try:
+            self.player.pause()
+        except:
+            pass
+
+    def seek(self, second):
+        try:
+            self.player.set_time(self.player.get_time() + second * 1000)
+        except:
+            pass
+
+    def stop(self):
+        if self.status is not None:
+            self.player.stop()
+            self.status = None
 
     def search(self, query):
         enc_query = urllib.parse.urlencode({'search_query': query})
