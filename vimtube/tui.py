@@ -58,10 +58,10 @@ class TUI:
         self.printl('index: ' + str(self.selection + 1))
 
     def interpret(self, key):
+        curses.endwin()
         if key == ord('/'):
             token = self.sentence(key)
             self.printl('searching...')
-            self.stdscr.refresh()
             self.player.search(token)
             self.update_selection()
             self.printl('catalogue updated with search term: ' + token)
@@ -87,6 +87,7 @@ class TUI:
             self.player.seek(-1 * params['big_seek_step'])
         elif key == ord(')'):
             self.player.seek(params['big_seek_step'])
+        self.stdscr.refresh()
 
     def sentence(self,key=0):
         token = ''
@@ -114,7 +115,7 @@ class TUI:
 
 def main(stdscr):
     ui = TUI(stdscr)
-
+    curses.cbreak()
     key = stdscr.getch()
     while True:
         ui.cl()
