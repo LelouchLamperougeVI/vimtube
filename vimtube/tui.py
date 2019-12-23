@@ -14,6 +14,8 @@ params={ # these settings are available to edit in ~/.config/vimtube/
 class TUI:
     def __init__(self, stdscr):
         self.stdscr = stdscr
+        curses.cbreak()
+        curses.noecho()
         self.selection = 0
         self.player = player.player()
         self.start_ui()
@@ -58,7 +60,6 @@ class TUI:
         self.printl('index: ' + str(self.selection + 1))
 
     def interpret(self, key):
-        curses.endwin()
         if key == ord('/'):
             token = self.sentence(key)
             self.printl('searching...')
@@ -87,7 +88,6 @@ class TUI:
             self.player.seek(-1 * params['big_seek_step'])
         elif key == ord(')'):
             self.player.seek(params['big_seek_step'])
-        self.stdscr.refresh()
 
     def sentence(self,key=0):
         token = ''
@@ -115,7 +115,6 @@ class TUI:
 
 def main(stdscr):
     ui = TUI(stdscr)
-    curses.cbreak()
     key = stdscr.getch()
     while True:
         ui.cl()

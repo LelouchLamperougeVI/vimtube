@@ -71,3 +71,30 @@ class player:
         html = urllib.request.urlopen(yt_url + '/results?' + enc_query)
         parser = parse(html.read().decode())
         self.catalogue = parser.results
+
+class ffplayer:
+    def __init__(self, video=None):
+        self.video = video
+        self.status = None
+        self.catalogue = list()
+
+    def load(self, selection=0):
+        if len(self.catalogue) > 0:
+            self.video = pafy.new(yt_url + self.catalogue[selection].url)
+
+    def search(self, query):
+        enc_query = urllib.parse.urlencode({'search_query': query})
+        html = urllib.request.urlopen(yt_url + '/results?' + enc_query)
+        parser = parse(html.read().decode())
+        self.catalogue = parser.results
+
+    def play(self):
+        self.player = MediaPlayer(self.video.getbest().url)
+        while True:
+            frame, val = self.player.get_frame()
+            if val == 'eof':
+                break
+            else:
+        self.player = vlc.MediaPlayer(self.video.getbest().url)
+        self.player.play()
+        self.status = 1
